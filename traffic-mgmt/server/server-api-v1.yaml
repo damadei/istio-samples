@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server-api-v1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: server-api
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: server-api
+        version: v1
+    spec:
+      containers:
+      - name: server-api
+        image: damadei/server-api:v1
+        imagePullPolicy: Always
+        env:
+          - name: version
+            value: "v1"
+        ports:
+          - containerPort: 8181
+            name: server-api-port
+        readinessProbe:
+          httpGet:
+            path: /
+            port: server-api-port
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /
+            port: server-api-port
+          initialDelaySeconds: 5
+          periodSeconds: 5
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: server-api
+  labels:
+    app: server-api
+spec:
+  selector:
+    app: server-api
+  ports:
+  - protocol: TCP
+    port: 8181
+    name: http
+    targetPort: 8181

@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: client-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: client-api
+  template:
+    metadata:
+      labels:
+        app: client-api
+    spec:
+      containers:
+      - name: client-api
+        image: damadei/client-api:v1
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 8080
+            name: client-api-port
+        env:
+          - name: API_SERVER_HOST
+            value: "server-api"
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: client-api-svc-lb
+spec:
+  selector:
+    app: client-api
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
+  type: LoadBalancer
